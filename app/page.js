@@ -13,9 +13,10 @@ import Onboarding from './components/Onboarding';
 // light up the wrong bot as solved. v5 also carries the chosen language.
 // v6 is the seven-level rewrite — the set went from five bots to seven and
 // only Brew & Bloom kept its id, so every older save is meaningless now.
-// v7 swapped levels 4 and 5 (filter before role line), so a v6 save lights up
-// the wrong bot for both.
-const STORE = 'injection-lab-v7';
+// v7 swapped levels 4 and 5 (filter before role line); v8 then swapped 3 and 4,
+// settling the middle at filter -> override -> role line. Either older save
+// lights up the wrong bot.
+const STORE = 'injection-lab-v8';
 
 const emptyProgress = () => ({ solved: {}, seenIntro: false, lang: 'en' });
 

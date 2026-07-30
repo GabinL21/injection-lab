@@ -61,10 +61,17 @@ function RichText({ text }) {
   );
 }
 
-// The level 2 interstitial. It has to read like something a security team
-// bolted on, not like the bot being coy — the whole lesson depends on the
-// player seeing that a separate thing stopped this, after the bot had spoken.
-function BlockedNotice({ length, product, s }) {
+// The interstitial on the filtered levels. It has to read like something a
+// security team bolted on, not like the bot being coy — the whole lesson
+// depends on the player seeing that a separate thing stopped this, after the
+// bot had spoken.
+//
+// It used to carry a footer reading "filter: outbound-secrets-v2 · 207
+// characters withheld · the assistant was not told". Cut 2026-07-30: the
+// version string and the byte count are noise to a fourteen-year-old, and the
+// one genuinely interesting clause was buried third in a monospace line nobody
+// read. What matters is already in the sentence above it.
+function BlockedNotice({ product, s }) {
   const [pre, , post] = s.blockedBody(product, null);
   return (
     <div className="blocked-notice">
@@ -79,7 +86,6 @@ function BlockedNotice({ length, product, s }) {
         <strong>{s.blockedCode}</strong>
         {post}
       </p>
-      <div className="bn-meta">{s.blockedMeta(length)}</div>
     </div>
   );
 }
@@ -147,7 +153,7 @@ export default function ChatWidget({
           <>
             {messages.map((m, i) =>
               m.kind === 'blocked' ? (
-                <BlockedNotice key={i} length={m.length} product={level.product} s={s} />
+                <BlockedNotice key={i} product={level.product} s={s} />
               ) : (
                 <div key={i} className={`msg ${m.role === 'user' ? 'me' : 'bot'}`}>
                   {m.role !== 'user' && (

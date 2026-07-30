@@ -687,14 +687,6 @@ textarea {
 .bn-body strong {
   color: #a5322a;
 }
-.bn-meta {
-  margin-top: 8px;
-  font-family: var(--font-mono), monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.04em;
-  color: #ad8681;
-}
-
 /* raw view */
 .raw {
   font-family: var(--font-mono), monospace;
