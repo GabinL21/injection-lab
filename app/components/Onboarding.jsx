@@ -10,7 +10,7 @@ import { FLAGS } from './Flags';
 // hand anybody a working attack before they have tried one.
 //
 // The bot row reads straight off LEVELS, so it always shows the real running
-// order — scrubber, role line, poisoned mail.
+// order: reason, identity, override, role line, scrubber, poisoned mail, boss.
 // There is no hints panel any more, so step 4 has to say where the clues
 // actually come from: the bot's own refusals.
 //

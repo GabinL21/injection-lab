@@ -11,7 +11,9 @@ import Onboarding from './components/Onboarding';
 // Bumped when the level ids stop meaning what they meant: a v3 save has
 // level 3 = Loot Loop, a v4 save has level 2 = Northfield, and either would
 // light up the wrong bot as solved. v5 also carries the chosen language.
-const STORE = 'injection-lab-v5';
+// v6 is the seven-level rewrite — the set went from five bots to seven and
+// only Brew & Bloom kept its id, so every older save is meaningless now.
+const STORE = 'injection-lab-v6';
 
 const emptyProgress = () => ({ solved: {}, seenIntro: false, lang: 'en' });
 

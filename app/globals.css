@@ -406,6 +406,20 @@ textarea {
   flex-direction: column;
   color: var(--brand-ink);
 }
+/* Hues are picked so that no two *consecutive* levels look alike — the widget
+   rebranding is how a player feels they have moved to a different product. */
+[data-brand='voltcade'] {
+  --brand: #5a3fc0;
+  --brand-deep: #46309a;
+  --brand-tint: #f3f1fd;
+  --brand-ink: #1d1348;
+}
+[data-brand='sunspot'] {
+  --brand: #c0327a;
+  --brand-deep: #9b2762;
+  --brand-tint: #fdf0f6;
+  --brand-ink: #3f0e28;
+}
 [data-brand='academy'] {
   --brand: #2e4a8c;
   --brand-deep: #22376a;
@@ -1319,6 +1333,11 @@ textarea {
   gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
+  /* Exactly four 96px cards plus their gaps, so seven bots break 4 + 3 and
+     read as a grid. Left to fill the modal they wrap 5 + 2, which looks like
+     an accident. */
+  max-width: 414px;
+  margin: 0 auto;
 }
 .ob-bot {
   width: 96px;
@@ -1336,6 +1355,10 @@ textarea {
 .ob-bot:nth-child(3) { animation-delay: 0.1s; }
 .ob-bot:nth-child(4) { animation-delay: 0.15s; }
 .ob-bot:nth-child(5) { animation-delay: 0.2s; }
+/* Seven cards at 96px wrap to 4 + 3 inside the 620px modal, which reads as a
+   deliberate grid rather than a squeezed row. Keep the stagger going. */
+.ob-bot:nth-child(6) { animation-delay: 0.25s; }
+.ob-bot:nth-child(7) { animation-delay: 0.3s; }
 @keyframes ob-pop {
   from {
     opacity: 0;
