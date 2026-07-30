@@ -1,0 +1,1571 @@
+/*
+  Injection Lab — visual system.
+
+  Two surfaces, deliberately opposed:
+    the LAB   — archival blue-black, monospace, instrumentation. Where you watch.
+    the WIDGET — a light, friendly, branded support chat. Where you attack.
+
+  Each level rebrands the widget so it reads as a product someone shipped rather
+  than a puzzle box. The lab chrome never changes; only the thing under glass.
+*/
+
+[data-brand='brew'],
+.widget {
+  --brand: #c4622d;
+  --brand-deep: #9c4a1e;
+  --brand-tint: #fff6ef;
+  --brand-ink: #3a2415;
+}
+
+:root {
+  --ground: #0b1a2e;
+  --ground-deep: #071322;
+  --panel: #102440;
+  --panel-2: #163050;
+  --line: #1f3b5e;
+  --line-soft: #17304e;
+
+  --paper: #e8edf2;
+  --muted: #8ba3bd;
+  --muted-dim: #5f7997;
+
+  --amber: #f0a830;
+  --amber-dim: #8a6320;
+  --seal: #e05c4e;
+  --seal-dim: #7c2f28;
+  --cyan: #5fc9d6;
+  --cyan-dim: #2c6d76;
+
+  --radius: 3px;
+  --shell: 1300px;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--ground);
+  background-image:
+    radial-gradient(ellipse 90% 55% at 50% -10%, #17365c 0%, transparent 70%),
+    linear-gradient(var(--ground), var(--ground-deep));
+  background-attachment: fixed;
+  color: var(--paper);
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+::selection {
+  background: var(--amber);
+  color: var(--ground-deep);
+}
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+/* An amber ring on an amber fill is 1.00:1 — a focused Send button looked
+   exactly like an unfocused one. A dark ring fixes that, but only if it is
+   drawn *inside* the fill: at a positive offset it lands on the dark page
+   background and disappears again. Hence the negative offset — dark on amber,
+   8.7:1, unmistakably a focus ring. */
+.btn.primary:focus-visible,
+.langtoggle button[aria-pressed='true']:focus-visible {
+  outline-color: #21160a;
+  outline-offset: -3px;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  /* Chrome on Android washes a tapped button with a translucent grey by
+     default, which on the amber fill reads as the button going dead. The
+     :active rules below are the replacement, and they are legible. */
+  -webkit-tap-highlight-color: transparent;
+}
+input,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+.eyebrow {
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-dim);
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.btn {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 9px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--paper);
+  transition: 0.15s;
+}
+/* :not(.primary) is load-bearing. Without it this rule also matched the solid
+   amber button — it declares `color`, the .primary hover rule does not, so the
+   label turned amber-on-amber at 1.23:1 and effectively vanished. On a phone
+   that is the *resting* look after a tap, because :hover sticks until you touch
+   something else, which is how it read as "terrible contrast when clicking". */
+.btn:not(.primary):hover:not(:disabled) {
+  border-color: var(--amber-dim);
+  color: var(--amber);
+}
+.btn:not(.primary):active:not(:disabled) {
+  background: var(--panel);
+}
+/* Disabled is the state you spend the most time looking at: Check and Send
+   both start disabled and stay there until you type. A blanket opacity is fine
+   for an outlined button, but on a solid amber fill it fades the label and the
+   fill together and lands at 1.5:1 — a word-shaped smudge. So the fill gets its
+   own disabled skin instead of being faded. Measured: 7.5:1 here, 4.7:1 for the
+   outlined buttons at 0.55. */
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.btn.primary {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: #21160a;
+  font-weight: 700;
+}
+/* Every state restates `color`, deliberately. The dark ink is what makes the
+   label readable on any amber, and leaving it to be inherited is the mistake
+   that caused the 1.23:1 hover. Measured: rest 8.7:1, hover 10.7:1, pressed
+   7.5:1, disabled 7.5:1. */
+.btn.primary:hover:not(:disabled) {
+  background: #ffbe4a;
+  border-color: #ffbe4a;
+  color: #21160a;
+}
+.btn.primary:active:not(:disabled) {
+  background: #e09a24;
+  border-color: #e09a24;
+  color: #21160a;
+}
+.btn.primary:disabled {
+  opacity: 1;
+  background: #3a3320;
+  border-color: var(--amber-dim);
+  color: #d9c79a;
+}
+
+/* ── shell ──────────────────────────────────────────────────── */
+
+.shell {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: 0 24px 56px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0 16px;
+  border-bottom: 1px solid var(--line-soft);
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.brand h1 {
+  font-family: var(--font-display), sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+/* margin-left:auto rather than the topbar's space-between, so the nav and the
+   language switch stay together on the right instead of drifting apart once
+   the switch became a sibling rather than a child of the nav. */
+.levelnav {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-left: auto;
+}
+.levelnav .step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  transition: 0.15s;
+}
+.levelnav .step:hover:not(:disabled) {
+  border-color: var(--muted-dim);
+  color: var(--paper);
+}
+.levelnav .step[data-state='active'] {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: rgba(240, 168, 48, 0.07);
+}
+.levelnav .step[data-state='solved'] {
+  border-color: var(--cyan-dim);
+  color: var(--cyan);
+}
+/* Locked levels have to read as locked, so this stays dim on purpose — but at
+   0.45 the number itself was 2.4:1 and you could not tell 03 from 05. */
+.levelnav .step:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+/* Language switch. Deliberately the quietest control in the topbar — it is set
+   once and then never touched again, so it must not compete with the level
+   chips for attention. Same segmented shape as the widget's Chat/Raw toggle so
+   it reads as "pick one of two" without a label. */
+.langtoggle {
+  display: flex;
+  margin-left: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.langtoggle button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  padding: 6px 8px;
+  color: var(--muted-dim);
+  background: transparent;
+  transition: 0.15s;
+}
+.langtoggle.wide button {
+  padding: 7px 12px;
+}
+/* The unselected flag is muted, not erased: at saturate(.15) the tricolore was
+   three grey bars and you could not tell which country you were switching to,
+   which defeats the point of using flags. Enough colour survives to identify
+   it; the lit background and full saturation carry "this one is on", so the
+   state is not signalled by colour alone. */
+.langtoggle .flag {
+  width: 21px;
+  height: 15px;
+  display: block;
+  border-radius: 1.5px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  filter: saturate(0.45) opacity(0.68);
+  transition: 0.15s;
+}
+.langtoggle button:hover .flag {
+  filter: saturate(0.7) opacity(0.85);
+}
+.langtoggle button[aria-pressed='true'] {
+  background: var(--panel-2);
+  color: var(--paper);
+}
+.langtoggle button[aria-pressed='true'] .flag {
+  filter: none;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55);
+}
+
+/* In the onboarding modal it sits above the stage, right-aligned, and gets to
+   spell the language out — someone who cannot read the step yet needs a word,
+   not a two-letter code. */
+.ob-lang {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 14px 0;
+}
+.ob-lang .langtoggle {
+  margin-left: 0;
+}
+.ob-lang .langtoggle button {
+  font-size: 10px;
+  padding: 6px 10px;
+}
+
+.levelnav .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
+}
+.levelnav .step[data-state='solved'] .dot,
+.levelnav .step[data-state='active'] .dot {
+  opacity: 1;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+@media (max-width: 980px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .shell {
+    padding: 0 14px 44px;
+  }
+}
+
+/* Phones. The topbar had no rules at all: five level chips plus "?" plus the
+   language switch sat on one un-wrapping row, so the switch was pushed off the
+   right edge and could only be reached by scrolling the page sideways.
+   Two rows now — title and language switch on the first, because the switch is
+   set once and has to be findable; the level chips on their own scrollable row
+   below, where a horizontal swipe is expected and harmless. */
+@media (max-width: 760px) {
+  .topbar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'brand lang'
+      'nav   nav';
+    gap: 10px 8px;
+    padding: 14px 0 12px;
+    margin-bottom: 16px;
+    align-items: center;
+  }
+  .brand {
+    grid-area: brand;
+    min-width: 0;
+  }
+  .brand h1 {
+    font-size: 18px;
+  }
+  .topbar > .langtoggle {
+    grid-area: lang;
+    margin-left: 0;
+  }
+  .levelnav {
+    grid-area: nav;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* room for the chips' focus ring, which would otherwise clip */
+    padding: 2px 0;
+  }
+  .levelnav::-webkit-scrollbar {
+    display: none;
+  }
+  .levelnav .step {
+    flex: 0 0 auto;
+  }
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* ── the branded widget ─────────────────────────────────────── */
+
+.widget {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06),
+    0 18px 42px -12px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  color: var(--brand-ink);
+}
+[data-brand='academy'] {
+  --brand: #2e4a8c;
+  --brand-deep: #22376a;
+  --brand-tint: #f1f4fb;
+  --brand-ink: #17203a;
+}
+[data-brand='lantern'] {
+  --brand: #8a4f9e;
+  --brand-deep: #6d3d7d;
+  --brand-tint: #f8f2fa;
+  --brand-ink: #2c1733;
+}
+[data-brand='driftwood'] {
+  --brand: #1f5f6b;
+  --brand-deep: #164751;
+  --brand-tint: #eff7f8;
+  --brand-ink: #102b30;
+}
+[data-brand='fern'] {
+  --brand: #2e7d5b;
+  --brand-deep: #226146;
+  --brand-tint: #f0f8f4;
+  --brand-ink: #163024;
+}
+
+.w-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 14px;
+  background: linear-gradient(180deg, var(--brand), var(--brand-deep));
+  color: #fff;
+}
+.w-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  flex: none;
+}
+.w-id {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  flex: 1;
+  min-width: 0;
+}
+.w-name {
+  font-weight: 700;
+  font-size: 14.5px;
+  letter-spacing: -0.01em;
+}
+.w-status {
+  font-size: 11.5px;
+  opacity: 0.85;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.w-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6ee7a8;
+  display: inline-block;
+}
+
+.widget .toggle {
+  display: flex;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  overflow: hidden;
+  flex: none;
+}
+.widget .toggle button {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  color: rgba(255, 255, 255, 0.85);
+  transition: 0.15s;
+}
+.widget .toggle button[aria-pressed='true'] {
+  background: #fff;
+  color: var(--brand-deep);
+  font-weight: 700;
+}
+
+/* the locked system prompt strip */
+.w-sys {
+  background: repeating-linear-gradient(135deg, #eef1f4 0 9px, #e7ebef 9px 18px);
+  border-bottom: 1px solid #dfe4e9;
+  padding: 9px 14px;
+  font-size: 11.5px;
+  color: #5d6b78;
+  line-height: 1.5;
+}
+.w-sys.open {
+  background: #f6f8fa;
+}
+.w-sys-label {
+  display: block;
+}
+.w-sys-label b {
+  color: #3d4a56;
+}
+.w-sys-text {
+  margin: 7px 0 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #3d4a56;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 190px;
+  overflow-y: auto;
+}
+
+.w-body {
+  background: var(--brand-tint);
+  padding: 16px 14px;
+  min-height: 330px;
+  max-height: 52vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.msg {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 86%;
+  animation: pop 0.2s ease-out;
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.msg.bot {
+  align-self: flex-start;
+}
+.msg.me {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+.msg-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #e2e7ec;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  flex: none;
+}
+.msg .bubble {
+  padding: 9px 13px;
+  border-radius: 15px;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.msg.bot .bubble {
+  background: #fff;
+  border: 1px solid #e4e9ee;
+  border-bottom-left-radius: 5px;
+  color: #26313c;
+}
+.msg.me .bubble {
+  background: var(--brand);
+  color: #fff;
+  border-bottom-right-radius: 5px;
+}
+
+.bubble.typing {
+  display: flex;
+  gap: 4px;
+  padding: 13px;
+}
+.bubble.typing i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #b6c0ca;
+  animation: blink 1.2s infinite;
+}
+.bubble.typing i:nth-child(2) {
+  animation-delay: 0.18s;
+}
+.bubble.typing i:nth-child(3) {
+  animation-delay: 0.36s;
+}
+@keyframes blink {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+/* level 3's security interstitial */
+.blocked-notice {
+  align-self: stretch;
+  background: #fff6f5;
+  border: 1px solid #f0c2bc;
+  border-left: 4px solid #d4453a;
+  border-radius: 10px;
+  padding: 11px 13px;
+  animation: jolt 0.32s ease-out;
+}
+@keyframes jolt {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+.bn-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bn-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #d4453a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.bn-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #a5322a;
+}
+.bn-body {
+  margin: 7px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #6d4642;
+}
+.bn-body strong {
+  color: #a5322a;
+}
+.bn-meta {
+  margin-top: 8px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: #ad8681;
+}
+
+/* raw view */
+.raw {
+  font-family: var(--font-mono), monospace;
+  font-size: 11.5px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  margin: 0;
+  color: #2b3540;
+  animation: pop 0.22s ease-out;
+}
+.raw .tok {
+  color: #9aa6b2;
+}
+.raw .t-system {
+  color: #c0392b;
+  font-weight: 700;
+}
+.raw .t-user {
+  color: #b7791f;
+  font-weight: 700;
+}
+.raw .t-model {
+  color: #1d6f7a;
+  font-weight: 700;
+}
+.raw .hidden-sys {
+  color: #b0554c;
+}
+
+.w-foot {
+  background: #fff;
+  border-top: 1px solid #e4e9ee;
+  padding: 9px 14px;
+  font-size: 11.5px;
+  color: #6b7885;
+  line-height: 1.5;
+}
+.w-foot b {
+  color: #3d4a56;
+}
+
+/* ── composer (lab chrome, not widget chrome) ───────────────── */
+
+.composer {
+  padding: 11px;
+}
+.composer textarea {
+  width: 100%;
+  background: var(--ground-deep);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-family: var(--font-mono), monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 74px;
+  transition: border-color 0.15s;
+}
+.composer textarea:focus {
+  outline: none;
+  border-color: var(--amber-dim);
+}
+.composer textarea::placeholder {
+  color: var(--muted-dim);
+}
+.composer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 9px;
+}
+.composer-bottom .meta {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--muted-dim);
+}
+
+/* ── right column ───────────────────────────────────────────── */
+
+.panel {
+  padding: 14px 15px;
+}
+.panel h2 {
+  font-family: var(--font-display), sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 4px 0 6px;
+}
+.panel .premise {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0;
+}
+.panel-title {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-dim);
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.panel-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line-soft);
+}
+
+.def {
+  display: grid;
+  grid-template-columns: 11px minmax(0, 1fr);
+  gap: 9px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line-soft);
+}
+.def:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+.def .mark {
+  color: var(--seal);
+  font-size: 9px;
+  padding-top: 4px;
+}
+.def .name {
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.def .detail {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.hint {
+  border-top: 1px solid var(--line-soft);
+  padding: 8px 0;
+}
+.hint:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+.hint .reveal {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted-dim);
+  text-align: left;
+  width: 100%;
+  padding: 3px 0;
+  transition: color 0.15s;
+}
+.hint .reveal:hover {
+  color: var(--amber);
+}
+.hint .text {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.55;
+  animation: pop 0.2s ease-out;
+}
+
+.goal {
+  border-color: var(--amber);
+  background: linear-gradient(var(--panel), rgba(240, 168, 48, 0.07));
+}
+.goal h2 {
+  font-family: var(--font-display), sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 5px 0 4px;
+  color: var(--paper);
+}
+.goal-note {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin: 0 0 6px;
+  line-height: 1.45;
+}
+.paste {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--ground-deep);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  margin: 7px 0 0;
+  color: var(--paper);
+  max-height: 190px;
+  overflow-y: auto;
+  user-select: all;
+}
+.copy {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-top: 6px;
+  padding: 3px 0;
+  text-decoration: underline;
+}
+
+.goal .shape {
+  font-size: 12px;
+  color: var(--muted-dim);
+  margin: 0 0 10px;
+}
+.goal .shape b {
+  font-family: var(--font-mono), monospace;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  font-weight: 400;
+}
+.goal form {
+  display: flex;
+  gap: 8px;
+}
+.goal input {
+  flex: 1;
+  min-width: 0;
+  background: var(--ground-deep);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+}
+.goal input:focus {
+  outline: none;
+  border-color: var(--amber);
+}
+.goal input::placeholder {
+  color: var(--muted-dim);
+  letter-spacing: 0.02em;
+}
+.goal .wrong {
+  color: var(--seal);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 9px;
+  animation: jolt 0.3s ease-out;
+}
+.goal .solved-note {
+  font-size: 13px;
+  color: var(--cyan);
+  margin: 0;
+}
+.goal .solved-note button {
+  color: var(--amber);
+  text-decoration: underline;
+}
+
+.unlock {
+  border-color: var(--amber-dim);
+  background: linear-gradient(var(--panel), rgba(240, 168, 48, 0.045));
+}
+.unlock form {
+  display: flex;
+  gap: 8px;
+}
+.unlock input {
+  flex: 1;
+  min-width: 0;
+  background: var(--ground-deep);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+}
+.unlock input:focus {
+  outline: none;
+  border-color: var(--amber);
+}
+.unlock input::placeholder {
+  color: var(--muted-dim);
+  letter-spacing: 0.02em;
+}
+.unlock .wrong {
+  color: var(--seal);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 9px;
+  animation: jolt 0.3s ease-out;
+}
+.unlock .solved-note {
+  font-size: 12.5px;
+  color: var(--cyan);
+  line-height: 1.5;
+  margin: 0;
+}
+.unlock .solved-note button {
+  color: var(--amber);
+  text-decoration: underline;
+  font-size: inherit;
+}
+
+.err {
+  border-color: var(--seal-dim);
+  background: rgba(224, 92, 78, 0.07);
+  padding: 10px 13px;
+  font-size: 12.5px;
+  color: #f3b3ab;
+  line-height: 1.5;
+}
+
+/* ── modals ─────────────────────────────────────────────────── */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 10, 18, 0.82);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 4vh 18px;
+  overflow-y: auto;
+  z-index: 50;
+  animation: fade 0.2s ease-out;
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  max-width: 660px;
+  width: 100%;
+  animation: modal-in 0.26s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+}
+.modal-head {
+  padding: 19px 22px 15px;
+  border-bottom: 1px solid var(--line);
+}
+.modal-head .stamp {
+  display: inline-block;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--amber);
+  border: 1.5px solid var(--amber);
+  border-radius: 2px;
+  padding: 3px 9px;
+  transform: rotate(-1.4deg);
+  animation: stamp 0.4s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: rotate(-1.4deg) scale(2.4);
+  }
+}
+.modal-head h2 {
+  font-family: var(--font-display), sans-serif;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin: 12px 0 0;
+}
+.modal-body {
+  padding: 18px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.modal-foot {
+  padding: 0 22px 22px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.block {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.block strong {
+  color: var(--paper);
+  font-weight: 600;
+}
+.block .k {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-dim);
+  display: block;
+  margin-bottom: 5px;
+}
+
+.declass {
+  background: var(--ground-deep);
+  border: 1px solid var(--seal-dim);
+  border-radius: 3px;
+  padding: 12px 14px;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  position: relative;
+  overflow: hidden;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.declass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, #26415f 0 22px, #1c344f 22px 26px);
+  animation: wipe 0.8s 0.15s cubic-bezier(0.5, 0, 0.2, 1) forwards;
+}
+@keyframes wipe {
+  to {
+    transform: translateX(101%);
+  }
+}
+
+.lesson {
+  border-left: 2px solid var(--amber);
+  padding: 2px 0 2px 13px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--paper);
+}
+
+.prose p {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--muted);
+  margin: 0 0 11px;
+}
+.prose p:last-child {
+  margin-bottom: 0;
+}
+.prose strong {
+  color: var(--paper);
+  font-weight: 600;
+}
+
+.rolekey {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rolekey .row {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.rolekey .tag {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  text-align: center;
+  font-weight: 700;
+}
+.rolekey .tag[data-role='system'] {
+  color: var(--seal);
+  border: 1px solid var(--seal-dim);
+  background: rgba(224, 92, 78, 0.09);
+}
+.rolekey .tag[data-role='user'] {
+  color: var(--amber);
+  border: 1px solid var(--amber-dim);
+  background: rgba(240, 168, 48, 0.09);
+}
+.rolekey .tag[data-role='assistant'] {
+  color: var(--cyan);
+  border: 1px solid var(--cyan-dim);
+  background: rgba(95, 201, 214, 0.09);
+}
+.rolekey .desc {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.5;
+  padding-top: 3px;
+}
+
+.finale-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.finale-item {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.finale-item .lvl {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--cyan);
+  border: 1px solid var(--cyan-dim);
+  border-radius: 2px;
+  padding: 3px 0;
+  text-align: center;
+}
+.finale-item .txt {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.finale-item .txt b {
+  color: var(--paper);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .declass::after {
+    display: none;
+  }
+}
+
+
+/* ── onboarding carousel ────────────────────────────────────── */
+
+.modal.ob {
+  max-width: 620px;
+  overflow: hidden;
+}
+
+.ob-stage {
+  background: var(--ground-deep);
+  border-bottom: 1px solid var(--line);
+  padding: 26px 24px;
+  min-height: 216px;
+  display: grid;
+  place-items: center;
+  animation: ob-in 0.28s ease-out;
+}
+@keyframes ob-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.ob-copy {
+  padding: 18px 24px 4px;
+}
+.ob-copy h2 {
+  font-family: var(--font-display), sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin: 6px 0 7px;
+}
+.ob-copy p {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0;
+}
+
+.ob-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 24px 20px;
+  flex-wrap: wrap;
+}
+.ob-dots {
+  display: flex;
+  gap: 6px;
+}
+.ob-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line);
+  transition: 0.2s;
+}
+.ob-dots span.on {
+  background: var(--amber);
+  width: 20px;
+  border-radius: 4px;
+}
+.ob-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* step 1 — the five bots */
+.ob-bots {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.ob-bot {
+  width: 96px;
+  background: #fff;
+  border-radius: 11px;
+  padding: 13px 8px 11px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 18px -8px rgba(0, 0, 0, 0.6);
+  animation: ob-pop 0.34s backwards cubic-bezier(0.2, 1.1, 0.4, 1);
+}
+.ob-bot:nth-child(2) { animation-delay: 0.05s; }
+.ob-bot:nth-child(3) { animation-delay: 0.1s; }
+.ob-bot:nth-child(4) { animation-delay: 0.15s; }
+.ob-bot:nth-child(5) { animation-delay: 0.2s; }
+@keyframes ob-pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.94);
+  }
+}
+.ob-bot-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--brand);
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+}
+.ob-bot-name {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--brand-deep);
+  text-align: center;
+  line-height: 1.25;
+}
+
+/* step 2 — chat to goal */
+.ob-goal-demo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  max-width: 400px;
+}
+.ob-chat {
+  width: 100%;
+  background: #fff6ef;
+  border-radius: 11px;
+  padding: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ob-msg {
+  font-size: 11.5px;
+  line-height: 1.45;
+  padding: 6px 10px;
+  border-radius: 11px;
+  max-width: 88%;
+}
+.ob-msg.bot {
+  align-self: flex-start;
+  background: #fff;
+  border: 1px solid #e4e9ee;
+  border-bottom-left-radius: 4px;
+  color: #26313c;
+}
+.ob-msg.me {
+  align-self: flex-end;
+  background: #c4622d;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.ob-msg.ob-win {
+  border-color: #f0a830;
+  box-shadow: 0 0 0 2px rgba(240, 168, 48, 0.35);
+}
+.ob-msg.ob-win b {
+  color: #a2601a;
+}
+.ob-arrow {
+  color: var(--amber);
+  font-size: 15px;
+  line-height: 1;
+}
+.ob-goalchip {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--amber);
+  background: rgba(240, 168, 48, 0.09);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  flex-wrap: wrap;
+}
+.ob-goalchip-k {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--paper);
+  flex: 1;
+  min-width: 130px;
+}
+.ob-goalchip-in {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  background: var(--ground-deep);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 4px 8px;
+  color: var(--amber);
+}
+.ob-goalchip-btn {
+  font-family: var(--font-mono), monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--amber);
+  color: #21160a;
+  font-weight: 700;
+  border-radius: 2px;
+  padding: 5px 9px;
+}
+
+/* step 4 — the refusal is the hint */
+.ob-tell {
+  background: rgba(240, 168, 48, 0.3);
+  box-shadow: 0 1px 0 #c4622d;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+.ob-tell-note {
+  font-size: 11.5px;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .ob-bot {
+    width: 80px;
+  }
+}
+
+/* step 2 — the hidden instructions */
+.ob-hidden {
+  width: 100%;
+  max-width: 430px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.ob-note {
+  width: 100%;
+  position: relative;
+  background: repeating-linear-gradient(135deg, #16304e 0 9px, #132a45 9px 18px);
+  border: 1px solid var(--seal-dim);
+  border-radius: 9px;
+  padding: 10px 12px 9px;
+}
+.ob-note-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono), monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--seal);
+}
+.ob-note-text {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #cfe0f0;
+  margin: 7px 0 8px;
+  filter: blur(4.4px);
+  user-select: none;
+  pointer-events: none;
+}
+.ob-note-foot {
+  display: block;
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  color: var(--muted-dim);
+}
+
+.ob-flow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0 6px;
+}
+.ob-flow-arrow {
+  color: var(--amber);
+  font-size: 14px;
+  line-height: 1;
+}
+.ob-flow-label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.ob-visible {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+  align-self: flex-start;
+}
+.ob-mini-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  flex: none;
+}
+.ob-mini-bubble {
+  background: #fff;
+  color: #26313c;
+  font-size: 12px;
+  padding: 7px 11px;
+  border-radius: 13px;
+  border-bottom-left-radius: 4px;
+}
+.ob-visible-label {
+  align-self: flex-start;
+  font-size: 10.5px;
+  color: var(--muted-dim);
+  margin: 6px 0 0 31px;
+}
+
+/* the elided step in the demo chat — never show a real technique */
+.ob-gap {
+  align-self: center;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: #a9755a;
+  background: rgba(196, 98, 45, 0.09);
+  border: 1px dashed rgba(196, 98, 45, 0.45);
+  border-radius: 9px;
+  padding: 5px 11px;
+  margin: 1px 0;
+}
